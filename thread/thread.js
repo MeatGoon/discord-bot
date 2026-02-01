@@ -35,9 +35,10 @@ module.exports = {
                 const hasTribeChiefRole = member.roles.cache.some(role => role.name === '부족장');
 
                 // 기존 예외 유지: 특정 ID는 작성자가 동일 ID일 때만 포함
-                const isBlocked = member.id === '185747474613272577' && message.author.id !== '185747474613272577';
+               const isBlocked = member.id === '185747474613272577' && message.author.id !== '185747474613272577';
 
                 return (isAdmin || hasTribeChiefRole) && !isBlocked;
+                // return (isAdmin || hasTribeChiefRole);
             });
             // 현재 스레드 멤버 목록 로드
             const threadMembers = await thread.members.fetch();

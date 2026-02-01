@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { REST, Routes, Client, Collection, GatewayIntentBits, Partials, Events } = require('discord.js');
+const { startTimerScheduler } = require('./scheduler/scheduler');
 const { token, prefix } = require('./config.json');
 const thread = require('./thread/thread.js');
 
@@ -160,11 +161,14 @@ client.once(Events.ClientReady, async () => {
 
   const commandsDir = path.resolve(__dirname, 'commands');
   const slashDir = path.resolve(__dirname, 'slash');
+  const scheduler = path.resolve(__dirname, 'scheduler')
 
   loadMessageCommands(commandsDir);
   const commandsData = loadSlashCommands(slashDir);
 
   await registerSlashCommands(commandsData);
+
+  startTimerScheduler(client);
 });
 
 client.login(token);
