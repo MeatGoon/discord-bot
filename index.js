@@ -52,24 +52,33 @@ function loadMessageCommands(commandsDir) {
   }
 }
 
-// 슬래시 명령어 로딩
+// 슬래시 명령어 로딩 (배열 export도 지원)
 function loadSlashCommands(slashDir) {
   const commandsData = [];
   if (!fs.existsSync(slashDir)) {
     console.warn(`⚠️ slash 폴더가 없습니다: ${slashDir}`);
     return commandsData;
   }
+
   const files = fs.readdirSync(slashDir).filter(f => f.endsWith('.js'));
   for (const file of files) {
     const mod = safeRequire(path.join(slashDir, file));
-    if (!mod?.data?.name || typeof mod.data.toJSON !== 'function') {
-      console.warn(`⚠️ 슬래시 스킵: ${file} (data.name/toJSON 누락)`);
-      continue;
+    if (!mod) continue;
+
+    // ✅ 기존 단일 export 유지 + ✅ 신규 배열 export 지원
+    const list = Array.isArray(mod) ? mod : [mod];
+
+    for (const cmd of list) {
+      if (!cmd?.data?.name || typeof cmd.data.toJSON !== 'function') {
+        console.warn(`⚠️ 슬래시 스킵: ${file} (data.name/toJSON 누락)`);
+        continue;
+      }
+      client.slashCommands.set(cmd.data.name, cmd);
+      commandsData.push(cmd.data.toJSON());
+      console.log(`✅ 슬래시 로드: /${cmd.data.name}`);
     }
-    client.slashCommands.set(mod.data.name, mod);
-    commandsData.push(mod.data.toJSON());
-    console.log(`✅ 슬래시 로드: /${mod.data.name}`);
   }
+
   return commandsData;
 }
 
